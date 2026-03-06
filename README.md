@@ -258,46 +258,6 @@
       .nav a{flex:1; justify-content:center; padding:10px 10px;}
       .chip{display:none;}
       .main{padding:14px;}
-
-      /* ===== Mobile UX Patch ===== */
-      .topbar{gap:10px}
-      .search{padding:12px 14px}
-      .search input{font-size:15px}
-
-      .filters{
-        flex-wrap:nowrap;
-        overflow-x:auto;
-        -webkit-overflow-scrolling:touch;
-        gap:8px;
-        padding-bottom:6px;
-        mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent);
-      }
-      .filters::-webkit-scrollbar{height:6px}
-      .filters::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14); border-radius:999px}
-      .fchip{flex:0 0 auto; padding:9px 12px; font-size:13px}
-
-      .list{gap:12px}
-      details{padding:12px 12px}
-      summary{font-size:15px}
-      .preview{font-size:13px; -webkit-line-clamp:3; opacity:.95;}
-      .content{font-size:14px; line-height:1.75;}
-
-      .btnline{gap:8px; margin-top:12px;}
-      .linkbtn, .copybtn{
-        width:100%;
-        justify-content:center;
-        padding:12px 12px;
-        font-size:14px;
-        border-radius:14px;
-      }
-      .btnline .meta{width:100%;}
-    }
-
-    @media (max-width: 420px){
-      .main{padding:12px}
-      .card{padding:14px}
-      .step{padding:5px 10px}
-      .cat{padding:4px 8px}
     }
   </style>
 </head>
