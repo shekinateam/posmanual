@@ -246,30 +246,6 @@
       white-space:nowrap;
     }
     .copybtn:hover{filter:brightness(1.08);}
-    .downloadbtn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:9px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,210,122,.28);
-      background:rgba(255,210,122,.10);
-      color:#fff2cf;
-      font-size:13px;
-      cursor:pointer;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .downloadbtn:hover{filter:brightness(1.08);}
-    .downloadbtn.disabled{
-      opacity:.45;
-      border-color:rgba(255,255,255,.18);
-      background:rgba(255,255,255,.06);
-      color:#aab2d5;
-      cursor:default;
-      pointer-events:none;
-    }
 
     .filecard{
       border:1px solid rgba(255,255,255,.10);
@@ -381,9 +357,13 @@ let __debug = {
 
 function escapeHtml(str){
   return String(str ?? "")
-    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
+
 function isLikelyUrl(s){
   const t = String(s||"").trim();
   if(!t) return false;
@@ -391,18 +371,21 @@ function isLikelyUrl(s){
   if(t.includes("docs.google.com") || t.includes("drive.google.com")) return true;
   return false;
 }
+
 function normUrl(s){
   const t = String(s||"").trim();
   if(!t) return "";
   if(/^https?:\/\//i.test(t)) return t;
   return "https://" + t;
 }
+
 function toNumberish(s){
   const t = String(s||"").trim();
   if(!t) return NaN;
   const n = parseFloat(t.replace(/[^\d.]/g,""));
   return Number.isFinite(n) ? n : NaN;
 }
+
 function normalizeHeader(s){
   return String(s||"").trim().toLowerCase().replace(/\s+/g,"");
 }
@@ -424,16 +407,11 @@ function extractGoogleDriveFileId(url){
   }
   return "";
 }
+
 function getDriveViewUrl(url){
   const raw = normUrl(url);
   const fileId = extractGoogleDriveFileId(raw);
   if(fileId && raw.includes("/file/")) return `https://drive.google.com/file/d/${fileId}/view`;
-  return raw;
-}
-function getDriveDownloadUrl(url){
-  const raw = normUrl(url);
-  const fileId = extractGoogleDriveFileId(raw);
-  if(fileId && raw.includes("/file/")) return `https://drive.google.com/uc?export=download&id=${fileId}`;
   return raw;
 }
 
@@ -481,7 +459,9 @@ function loadByGviz(gid, tq){
           return f || v;
         }));
         resolve(rows);
-      }catch(e){ reject(e); }
+      }catch(e){
+        reject(e);
+      }
     };
 
     script.src = url;
@@ -494,6 +474,7 @@ function loadByGviz(gid, tq){
 function buildCsvUrl(gid){
   return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(SHEET_ID)}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`;
 }
+
 function parseCSV(text){
   const rows = [];
   let row = [];
@@ -523,13 +504,14 @@ function parseCSV(text){
   rows.push(row.map(x=>String(x).replace(/\r/g,"")));
   return rows.filter(r => r.some(c => String(c).trim()!==""));
 }
+
 async function loadByCsv(gid){
   const url = buildCsvUrl(gid);
   const res = await fetch(url, { cache: "no-store" });
   const text = await res.text();
 
   if(!res.ok) throw new Error(`CSV HTTP ${res.status}`);
-  if(/<html/i.test(text) && /google/i.test(text)) {
+  if(/<html/i.test(text) && /google/i.test(text)){
     throw new Error("CSV 응답이 아닌 페이지(권한/게시 설정 확인 필요)");
   }
   return parseCSV(text);
@@ -552,6 +534,7 @@ function buildColMap(headerRow){
     }
     return -1;
   };
+
   return {
     stepIdx:       pick("단계","step","순서","no","번호"),
     catIdx:        pick("구분","분류","카테고리","category","type"),
@@ -562,7 +545,7 @@ function buildColMap(headerRow){
 
     fileNameIdx:   pick("파일명","파일이름","name","filename","문서명"),
     fileDescIdx:   pick("설명","내용","desc","detail","비고"),
-    fileLinkIdx:   pick("파일링크","링크","url","다운로드링크","자료링크"),
+    fileLinkIdx:   pick("파일링크","링크","url","자료링크"),
     fileTagIdx:    pick("태그","tags","키워드")
   };
 }
@@ -646,7 +629,7 @@ function rowsToFileItems(rows){
 
   const items = dataRows.map((r, i)=>({
     rowNo: i+2,
-    cat: String(r[catI]||"").trim(),
+    cat:  String(r[catI]||"").trim(),
     name: String(r[fileNameI]||"").trim(),
     desc: String(r[fileDescI]||"").trim(),
     link: String(r[fileLinkI]||"").trim(),
@@ -664,13 +647,15 @@ function uniqCats(items){
   });
   return Array.from(set);
 }
+
 function renderFilters(items, wrapId, mode){
   const wrap = document.getElementById(wrapId);
   const cats = uniqCats(items);
 
   wrap.innerHTML = "";
+
   const all = document.createElement("div");
-  all.className = "fchip" + (filtersState[mode]==="all" ? " active" : "");
+  all.className = "fchip" + (filtersState[mode] === "all" ? " active" : "");
   all.dataset.f = "all";
   all.dataset.mode = mode;
   all.textContent = "전체";
@@ -678,13 +663,14 @@ function renderFilters(items, wrapId, mode){
 
   cats.forEach(c=>{
     const el = document.createElement("div");
-    el.className = "fchip" + (filtersState[mode]===c ? " active" : "");
+    el.className = "fchip" + (filtersState[mode] === c ? " active" : "");
     el.dataset.f = c;
     el.dataset.mode = mode;
     el.textContent = c;
     wrap.appendChild(el);
   });
 }
+
 function matchesQuery(blob, q){
   if(!q) return true;
   return blob.toLowerCase().includes(q);
@@ -695,7 +681,7 @@ function renderSteps(items){
   const q = ($("#q").value||"").trim().toLowerCase();
 
   const filtered = items.filter(x=>{
-    if(filtersState.steps!=="all" && String(x.cat||"").trim() !== filtersState.steps) return false;
+    if(filtersState.steps !== "all" && String(x.cat||"").trim() !== filtersState.steps) return false;
     const blob = `${x.step} ${x.cat} ${x.title} ${x.body} ${x.tags} ${x.link}`;
     return matchesQuery(blob, q);
   });
@@ -745,6 +731,7 @@ function renderSteps(items){
         </button>
       </div>
     `;
+
     list.appendChild(d);
   });
 }
@@ -754,7 +741,7 @@ function renderFiles(items){
   const q = ($("#q").value||"").trim().toLowerCase();
 
   const filtered = items.filter(x=>{
-    if(filtersState.files!=="all" && String(x.cat||"").trim() !== filtersState.files) return false;
+    if(filtersState.files !== "all" && String(x.cat||"").trim() !== filtersState.files) return false;
     const blob = `${x.cat} ${x.name} ${x.desc} ${x.tags} ${x.link}`;
     return matchesQuery(blob, q);
   });
@@ -778,7 +765,6 @@ function renderFiles(items){
 
     const hasLink = isLikelyUrl(x.link);
     const viewUrl = hasLink ? getDriveViewUrl(x.link) : "";
-    const downloadUrl = hasLink ? getDriveDownloadUrl(x.link) : "";
 
     item.innerHTML = `
       <div class="filetitle">
@@ -795,15 +781,12 @@ function renderFiles(items){
           📂 열기
         </a>
 
-        <a class="downloadbtn ${hasLink ? "" : "disabled"}" href="${hasLink ? escapeHtml(downloadUrl) : "#"}" target="_blank" rel="noopener">
-          ⬇ 다운로드
-        </a>
-
         <button class="copybtn" data-copy="${escapeHtml(hasLink ? viewUrl : "")}">
           🔗 링크 복사
         </button>
       </div>
     `;
+
     list.appendChild(item);
   });
 }
